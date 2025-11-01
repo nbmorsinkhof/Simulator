@@ -31,6 +31,8 @@ protected:
 
     float forward_euler(float dt, float ddt_x, float x_prev);
 
+    //float runge_kutta(float dt, float ddt_x, float x_prev);
+
 private:
     SystemObjects* SystemObjects_ = nullptr;
 };

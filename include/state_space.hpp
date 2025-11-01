@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <shared_mutex>
+#include <math.h>
 
 class SystemObjects;
 
@@ -50,7 +51,10 @@ private:
 // Derived class
 class StateSpacePendulum: public StateSpace {
 public:
-    StateSpacePendulum();
+    StateSpacePendulum()
+    {
+        dimension_ = 4;
+    };
 
     //member functions
     void set_length_arm(float length);
@@ -63,6 +67,31 @@ protected:
     float length_arm = 0.75;
     float g = 9.81;
     float resistance_ = 0.01;
+};
+
+
+
+
+/********************************* StateSpace::Segway**********************************************************/
+
+// Derived class
+class StateSpaceSegway: public StateSpace {
+public:
+    StateSpaceSegway();
+
+protected:
+    void state_space_equation() override; // virtual for polymorphism
+    void state_space_observation() override;
+    float length = 0.75;
+    float g = 9.81;
+    float mass_body = 1.0; //kg
+    float mass_wheel = 0.1; //kg
+    float inertia_body = (mass_body*length*length)/12;
+    float r_wheel = 0.1; //meters 
+    float A_ = pow(r_wheel, 2)*(mass_body + 2*mass_wheel);
+    float B_ = inertia_body + mass_body*pow(length, 2);
+    float C_ = mass_body*r_wheel*length*cos(state_[2]);
+    float S_ = ;
 };
 
 #endif
