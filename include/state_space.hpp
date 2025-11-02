@@ -51,10 +51,7 @@ private:
 // Derived class
 class StateSpacePendulum: public StateSpace {
 public:
-    StateSpacePendulum()
-    {
-        dimension_ = 4;
-    };
+    StateSpacePendulum();
 
     //member functions
     void set_length_arm(float length);
@@ -91,7 +88,7 @@ protected:
     float A_ = pow(r_wheel, 2)*(mass_body + 2*mass_wheel);
     float B_ = inertia_body + mass_body*pow(length, 2);
     float C_ = mass_body*r_wheel*length*cos(state_[2]);
-    float S_ = ;
+    float S_ = C_ = mass_body*r_wheel*length*sin(state_[2]);
 };
 
 #endif

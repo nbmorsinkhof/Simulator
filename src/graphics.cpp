@@ -13,7 +13,31 @@
 #include <stdbool.h>
 #include <string>
 
+/**********************OBJECTS**************************** */
+void GeometricObject::worldToPixel(std::array<float, 2> world_pos, QPointF& p){
+    p.setX(canvas_config.PIXEL_WIDTH*(world_pos[0] + canvas_config.x_origin)/(canvas_config.x_world_limits[1]-canvas_config.x_world_limits[0]));
+    p.setY(canvas_config.PIXEL_HEIGHT*(world_pos[1] + canvas_config.y_origin)/(canvas_config.y_world_limits[1]-canvas_config.y_world_limits[0]));
+}
 
+//Circle
+void CircleObject::update(){
+    worldToPixel(position_world, geometry.center);
+}
+
+void CircleObject::draw(QPainter& p){
+    p.drawEllipse(geometry.center, geometry.radius, geometry.radius);
+}
+//Line 
+void LineObject::update(){
+    worldToPixel(base_world, p1);
+    worldToPixel(position_world, p2);
+    geometry.setP1(p1);
+    geometry.setP2(p2);
+}
+
+void LineObject::draw(QPainter& p){
+    p.drawLine(geometry);
+}
 
 /******************************CANVAS***************************************************** */
 
@@ -25,18 +49,10 @@ Canvas::Canvas(QWidget* parent, Qt::WindowFlags f)
 
 //init
 void Canvas::init(){
-    PhysicalObject obj_pendulum_mass;
-    obj_pendulum_mass.name = "pendulum_mass";
-    obj_pendulum_mass.type = "circle";
-    objects_.push_back(std::move(obj_pendulum_mass));  
-
-    PhysicalObject obj_pendulum_arm;
-    obj_pendulum_arm.name = "pendulum_arm";
-    obj_pendulum_arm.type = "line";
-    obj_pendulum_arm.base_world[0] = 0;
-    obj_pendulum_arm.base_world[1] = 0;
-    objects_.push_back(std::move(obj_pendulum_arm));  
-
+        
+    objects_.emplace_back(std::make_unique<CircleObject>("pendulum mass", canvas_config_));
+    objects_.emplace_back(std::make_unique<LineObject>("pendulum arm", canvas_config_));
+    
     //buttons init
     button_start_ = new QPushButton("Start", this);
     QObject::connect(button_start_, &QPushButton::clicked, this, &Canvas::button_start_clicked);
@@ -61,48 +77,46 @@ void Canvas::init_size(){
 void Canvas::set_system(SystemObjects* s){
     SystemObjects_ = s;
 }
-
-// Mutator functions
-void Canvas::setObjectWorldPos(const std::string& name, float x, float y){
-    for (auto& o : objects_) {
-        if (o.name == name) {
-            o.position_world[0] = x;
-            o.position_world[1] = y;
-            worldToPixelTransform(o);
-            break;
+//get functions
+GeometricObject* Canvas::get_GeometricObject(std::string name){
+        for (const auto& obj: objects_){
+            if (obj && obj->name==name){
+                return obj.get();
+                break;
+            }
         }
+        return nullptr;
     }
-    update();
+// Mutator functions(This function is specific for every canvas)
+void Canvas::setObjectWorldPos(){
+    const auto& obs = SystemObjects_->state_space.get_observation();
+
+    if (auto* mass = get_GeometricObject("pendulum_mass")){
+        mass->position_world[0] = obs[0];
+        mass->position_world[1] = obs[1];
+    }
+    if (auto* armBase = get_GeometricObject("pendulum_arm")){
+        if(auto* arm = dynamic_cast<LineObject*>(armBase)){
+            arm->position_world[0] = obs[0];
+            arm->position_world[1] = obs[1];
+            arm->base_world[0] = 0.0;
+            arm->base_world[1] = 0.0;
+        }
+        
+    }
+    
+    //update();
 }
        
 // Draw functions
 void Canvas::paintEvent(QPaintEvent* event){
     QPainter p(this);
-    for(int i=0; i<objects_.size(); i++){
-        drawObject(objects_[i], p);
+    for(const auto& obj: objects_){
+        obj->draw(p);
     }
 }
 
-void Canvas::drawObject(PhysicalObject& obj, QPainter& p){
-    p.save();
-    if(obj.type=="circle"){
-        std::cout<<"in draw object: " << obj.position_pxl.x()<<std::endl;
-        p.drawEllipse(obj.position_pxl, obj.size, obj.size);
-    }
-    else if(obj.type=="line"){
-        p.drawLine(obj.base_pxl, obj.position_pxl);
-    }
-}
 
-void Canvas::worldToPixelTransform(PhysicalObject& obj){
-    float x_world = obj.position_world[0];
-    float y_world = obj.position_world[1];
-    obj.position_pxl.setX(PIXEL_WIDTH_*(x_world + X_origin_)/(x_world_limits_[1]-x_world_limits_[0]));
-    obj.position_pxl.setY(PIXEL_HEIGHT_*(y_world + Y_origin_)/(y_world_limits_[1]-y_world_limits_[0]));
-
-    obj.base_pxl.setX(PIXEL_WIDTH_*(obj.base_world[0] + X_origin_)/(x_world_limits_[1]-x_world_limits_[0]));
-    obj.base_pxl.setY(PIXEL_HEIGHT_*(obj.base_world[1] + Y_origin_)/(y_world_limits_[1]-y_world_limits_[0]));
-}
 // Event functions
 void Canvas::keyPressEvent(QKeyEvent* e){
     if(e->key()==Qt::Key_Space){
@@ -131,6 +145,20 @@ void Canvas::button_ConfirmArmLength_clicked(){
         SystemObjects_->simulator.set_length_arm(std::stof(input_ArmLength_));
     };
 }
+
+
+
+/******************************CANVAS SEGWAY***************************************************** */
+
+
+/******************************CANVAS SEGWAY***************************************************** */
+
+
+
+
+
+
+
 /****************************** GRAPHICS******************************** */
 Graphics::Graphics(
     int& arg,
@@ -158,10 +186,6 @@ int Graphics::run(){
 }
 
 void Graphics::timer_function(){
-    observation_ = SystemObjects_->simulator.get_observation();
-    canvas_.setObjectWorldPos( "pendulum_mass", observation_[0], observation_[1]);
-    canvas_.setObjectWorldPos("pendulum_arm", observation_[0], observation_[1]);
-    std::cout<<"obs_0: "<<observation_[0]<<"obs_1"<<observation_[1]<<std::endl;
     canvas_.update();
 }
 

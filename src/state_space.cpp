@@ -101,22 +101,19 @@ StateSpaceSegway::StateSpaceSegway()
     observation_ = {0.0, 0.0, 0.0};
  }
 
-void StateSpacePendulum::state_space_equation(){
+void StateSpaceSegway::state_space_equation(){
     C_ = mass_body*r_wheel*length*cos(state_[2]);
     S_ = mass_body*r_wheel*length*sin(state_[2]);
 
     ddt_state_[0] = state_[1];
-    ddt_state_[1] = B*S_*pow(state_[3],2) - C_*mass_body*gravity*length*sin(state_[2]) / (A_*B_ - pow(C_, 2) );
+    ddt_state_[1] = B_*S_*pow(state_[3],2) - C_*mass_body*g*length*sin(state_[2]) / (A_*B_ - pow(C_, 2) );
     ddt_state_[2] = state_[3];
-    ddt_state_[3] = C*S_*pow(state_[3],2) - A_*mass_body*gravity*length*sin(state_[2]) / (A_*B_ - pow(C_, 2) );
+    ddt_state_[3] = C_*S_*pow(state_[3],2) - A_*mass_body*g*length*sin(state_[2]) / (A_*B_ - pow(C_, 2) );
 }
 
-void StateSpacePendulum::state_space_observation(){
+void StateSpaceSegway::state_space_observation(){
     observation_[0] = r_wheel*state_[0];
     observation_[1] = length*std::sin(state_[2]) + observation_[0];
-    observation_[2] = length*cos(state[2]);
+    observation_[2] = length*cos(state_[2]);
 }
 
-void StateSpacePendulum::set_length_arm(float length){
-    length_arm = length;
-}

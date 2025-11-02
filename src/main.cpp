@@ -22,7 +22,6 @@ int main(int argc, char* argv[]){
     //Set state of pendulum
     pendulum.set_state(0.6, 0);
 
-    StateSpaceSegway segway;
     // Create simulator and pass pendulum
     Simulator simulator;
     // Create Graphics instance
