@@ -14,6 +14,8 @@
 #include <stdbool.h>
 #include <vector>
 #include <array>
+#include <unordered_map>
+#include <memory>
 
 #include "simulator.hpp"
 
@@ -46,7 +48,6 @@ struct CanvasConfig{
     float y_origin;
 };
 
-
 struct GeometricObject{
     GeometricObject(std::string n, CanvasConfig& canv_conf)
         : name(std::move(n)), canvas_config(canv_conf){}
@@ -74,7 +75,7 @@ struct CircleObject : GeometricObject{
 };
 //Rectangle
 struct RectangleObject : GeometricObject{
-    RectangleObject(std::string n, CanvasConfig canv_conf)
+    RectangleObject(std::string n, CanvasConfig& canv_conf)
         : GeometricObject(std::move(n), canv_conf)
         {
             shape_type = ShapeType::RECT;
@@ -87,7 +88,7 @@ struct RectangleObject : GeometricObject{
 };
 //Line
 struct LineObject : GeometricObject{
-    LineObject(std::string n, CanvasConfig canv_conf)
+    LineObject(std::string n, CanvasConfig& canv_conf)
         : GeometricObject(std::move(n), canv_conf)
         {
             shape_type = ShapeType::LINE;
@@ -125,7 +126,7 @@ protected:
 private:
     SystemObjects* SystemObjects_ = nullptr;
     void init();
-    std::vector<std::unique_ptr<GeometricObject>> objects_;
+    std::unordered_map<std::string, std::unique_ptr<GeometricObject>> objects_;
 
     std::array<float, 2> x_world_limits_ = {-1.0, 1.0};
     std::array<float, 2> y_world_limits_ = {-1.0, 1.0};

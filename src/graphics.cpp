@@ -17,10 +17,16 @@
 void GeometricObject::worldToPixel(std::array<float, 2> world_pos, QPointF& p){
     p.setX(canvas_config.PIXEL_WIDTH*(world_pos[0] + canvas_config.x_origin)/(canvas_config.x_world_limits[1]-canvas_config.x_world_limits[0]));
     p.setY(canvas_config.PIXEL_HEIGHT*(world_pos[1] + canvas_config.y_origin)/(canvas_config.y_world_limits[1]-canvas_config.y_world_limits[0]));
+    
+    std::cout<<name<<std::endl;
+    std::cout<<"canvas config: "<<canvas_config.x_world_limits[0]<<", "<<canvas_config.x_world_limits[1]<<std::endl;
+    std::cout<<"world_x world_y: "<<world_pos[0]<<world_pos[1]<<std::endl;
+    std::cout<<"x, y: "<<p.x()<<", "<<p.y()<<std::endl;
 }
 
 //Circle
 void CircleObject::update(){
+    std::cout<<"Update Circle"<<std::endl;
     worldToPixel(position_world, geometry.center);
 }
 
@@ -29,10 +35,12 @@ void CircleObject::draw(QPainter& p){
 }
 //Line 
 void LineObject::update(){
+    std::cout<<"Update Line"<<std::endl;
     worldToPixel(base_world, p1);
     worldToPixel(position_world, p2);
     geometry.setP1(p1);
     geometry.setP2(p2);
+    std::cout<<"geometry line: " <<base_world[0] << std::endl;
 }
 
 void LineObject::draw(QPainter& p){
@@ -49,10 +57,10 @@ Canvas::Canvas(QWidget* parent, Qt::WindowFlags f)
 
 //init
 void Canvas::init(){
-        
-    objects_.emplace_back(std::make_unique<CircleObject>("pendulum mass", canvas_config_));
-    objects_.emplace_back(std::make_unique<LineObject>("pendulum arm", canvas_config_));
-    
+    objects_.emplace("pendulum_mass", std::make_unique<CircleObject>("pendulum_mass", canvas_config_)) ;
+    objects_.emplace("pendulum_arm", std::make_unique<LineObject>("pendulum_arm", canvas_config_)) ;
+    dynamic_cast<CircleObject*>(get_GeometricObject("pendulum_mass"))->geometry.radius = 100;
+
     //buttons init
     button_start_ = new QPushButton("Start", this);
     QObject::connect(button_start_, &QPushButton::clicked, this, &Canvas::button_start_clicked);
@@ -77,42 +85,39 @@ void Canvas::init_size(){
 void Canvas::set_system(SystemObjects* s){
     SystemObjects_ = s;
 }
+
 //get functions
 GeometricObject* Canvas::get_GeometricObject(std::string name){
-        for (const auto& obj: objects_){
-            if (obj && obj->name==name){
-                return obj.get();
-                break;
+    if (auto it = objects_.find(name); it != objects_.end()) {
+            return it->second.get();
             }
-        }
         return nullptr;
     }
 // Mutator functions(This function is specific for every canvas)
 void Canvas::setObjectWorldPos(){
     const auto& obs = SystemObjects_->state_space.get_observation();
-
     if (auto* mass = get_GeometricObject("pendulum_mass")){
         mass->position_world[0] = obs[0];
         mass->position_world[1] = obs[1];
     }
-    if (auto* armBase = get_GeometricObject("pendulum_arm")){
-        if(auto* arm = dynamic_cast<LineObject*>(armBase)){
-            arm->position_world[0] = obs[0];
-            arm->position_world[1] = obs[1];
-            arm->base_world[0] = 0.0;
-            arm->base_world[1] = 0.0;
-        }
-        
+    if (auto* arm = get_GeometricObject("pendulum_arm")){
+        std::cout<<"Setting Geometry*****************************************************"<<std::endl;
+        std::cout<<get_GeometricObject("pendulum_arm")->name<<std::endl;
+        dynamic_cast<LineObject*>(arm)->position_world[0] = obs[0];
+        dynamic_cast<LineObject*>(arm)->position_world[1] = obs[1];
+        dynamic_cast<LineObject*>(arm)->base_world[0] = 0.0;
+        dynamic_cast<LineObject*>(arm)->base_world[1] = 0.0;
     }
-    
-    //update();
 }
        
 // Draw functions
 void Canvas::paintEvent(QPaintEvent* event){
     QPainter p(this);
     for(const auto& obj: objects_){
-        obj->draw(p);
+        //update functions from objects
+        obj.second.get()->update();
+        //draw objects
+        obj.second.get()->draw(p);
     }
 }
 
@@ -186,6 +191,7 @@ int Graphics::run(){
 }
 
 void Graphics::timer_function(){
+    canvas_.setObjectWorldPos();
     canvas_.update();
 }
 
