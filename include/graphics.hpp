@@ -22,10 +22,10 @@
 
 class SystemObjects;
 
-/*********************CANVAS********************************* */
 
-
-//Object on canvas
+/***************************** GEOMETRIC OBJECTS****************************** */
+/***************************** GEOMETRIC OBJECTS****************************** */
+/***************************** GEOMETRIC OBJECTS****************************** */
 
 
 enum class ShapeType{
@@ -81,7 +81,7 @@ struct RectangleObject : GeometricObject{
             shape_type = ShapeType::RECT;
         }
     //members
-
+    QRectF geometry;
     //functions
     void update() override;
     void draw(QPainter& p) override;
@@ -102,23 +102,74 @@ struct LineObject : GeometricObject{
     void update() override;
     void draw(QPainter& p) override;
 };
+
+/*************************************CANVAS BASE*************************************** */
+/*************************************CANVAS BASE*************************************** */
+/*************************************CANVAS BASE*************************************** */
+class CanvasBase: public QWidget{
+public:
+    explicit CanvasBase(QWidget* parent = nullptr, Qt::WindowFlags f = {});
+
+    // mutator functions
+
+    //initialize screen size
+    void init_size();
+    //Set system objects
+    void set_system(SystemObjects* s);
+    //set object world pos: link physics position to graphics position(specific to derived class)
+    virtual void setObjectWorldPos();
+    //Get geometric object: Usually used insided "setObjectWorldPos" to acces object position
+    GeometricObject* get_GeometricObject(std::string name);
+
+protected:
+    //Draw objects and update the pixel coordinates
+    void paintEvent(QPaintEvent* event);
+
+    SystemObjects* SystemObjects_ = nullptr;
+    virtual void init();
+    std::unordered_map<std::string, std::unique_ptr<GeometricObject>> objects_;
+
+    std::array<float, 2> x_world_limits_ = {-1.0, 1.0};
+    std::array<float, 2> y_world_limits_ = {-1.0, 1.0};
+    float X_origin_ = 1.0;
+    float Y_origin_ = 1.0;
+
+    const int PIXEL_WIDTH_ = 800;
+    const int PIXEL_HEIGHT_ = 800;
+
+    CanvasConfig canvas_config_{
+        PIXEL_WIDTH_,
+        PIXEL_HEIGHT_,
+        x_world_limits_,
+        y_world_limits_,
+        X_origin_,
+        Y_origin_
+    };
+};
+
+
+
+
+
+
 /************************ CANVAS ******************************* */
 class Canvas: public QWidget{
 public:
     explicit Canvas(QWidget* parent = nullptr, Qt::WindowFlags f = {});
 
     // mutator functions
-    void set_circle_pos(float x, float y);
 
+    //initialize screen size
     void init_size();
-
+    //Set system objects
     void set_system(SystemObjects* s);
-
+    //set object world pos: link physics position to graphics position(specific to derived class)
     void setObjectWorldPos();
-
+    //Get geometric object: Usually used insided "setObjectWorldPos" to acces object position
     GeometricObject* get_GeometricObject(std::string name);
 
 protected:
+    //paint objects
     void paintEvent(QPaintEvent* event) override;
 
     void keyPressEvent(QKeyEvent* e) override;
@@ -166,50 +217,37 @@ private:
 
 /*********************CANVAS SEGWAY********************************* */
 
+class CanvasSegway : public CanvasBase{
+public:
+    explicit CanvasSegway(QWidget* parent = nullptr, Qt::WindowFlags f={});
 
-//Object on canvas
+    void setObjectWorldPos() override;
 
+private:
+    void init() override;
 
-// class Canvas: public QWidget{
-// public:
-//     explicit Canvas(QWidget* parent = nullptr, Qt::WindowFlags f = {});
-
-//     // mutator functions
-
-//     void set_system(SystemObjects* s);
-
-//     void setObjectWorldPos(const std::string&, float, float);
-
-// protected:
-//     void paintEvent(QPaintEvent* event) override;
-//     void drawObject(PhysicalObject& obj, QPainter& p);
-//     void worldToPixelTransform(PhysicalObject&);
-
-//     void keyPressEvent(QKeyEvent* e) override;
-
-// private:
-//     SystemObjects* SystemObjects_ = nullptr;
-//     void init();
-//     std::vector<PhysicalObject> objects_;
-
-//     std::array<float, 2> x_world_limits_ = {-1.0, 1.0};
-//     std::array<float, 2> y_world_limits_ = {-1.0, 1.0};
-//     float X_origin_ = 1.0;
-//     float Y_origin_ = 1.0;
-
-//     const int PIXEL_WIDTH_ = 800;
-//     const int PIXEL_HEIGHT_ = 800;
-
-//     //buttons and control
-//     QPushButton* button_start_; 
-//     QPushButton* button_stop_;
-
-//     //button functions
-//     void button_start_clicked();
-//     void button_stop_clicked();
-// };
+};
 
 
+
+
+/*******************CANVAS PENDULUM**************************** */
+/*******************CANVAS PENDULUM**************************** */
+/*******************CANVAS PENDULUM**************************** */
+class CanvasPendulum : public CanvasBase{
+public:
+    explicit CanvasPendulum(QWidget* parent = nullptr, Qt::WindowFlags f={});
+
+    void setObjectWorldPos() override;
+
+private:
+    void init() override;
+
+};
+
+
+/*********************GRAPHICS********************************* */
+/*********************GRAPHICS********************************* */
 /*********************GRAPHICS********************************* */
 class Graphics : public QObject{
 
@@ -227,7 +265,7 @@ private:
 
     SystemObjects* SystemObjects_ = nullptr;
     QApplication app_;
-    Canvas canvas_;
+    CanvasSegway canvas_;
     std::vector<float> observation_;
     QTimer timer_;
 };

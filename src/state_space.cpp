@@ -112,8 +112,14 @@ void StateSpaceSegway::state_space_equation(){
 }
 
 void StateSpaceSegway::state_space_observation(){
-    observation_[0] = r_wheel*state_[0];
-    observation_[1] = length*std::sin(state_[2]) + observation_[0];
-    observation_[2] = length*cos(state_[2]);
+    observation_[0] = r_wheel*state_[0]; // x position
+    observation_[1] = length*std::sin(state_[2]) + observation_[0]; // x position body
+    observation_[2] = length*cos(state_[2]); // y_position body
+    observation_[3] = r_wheel*cos(state_[0]);
+    observation_[4] = r_wheel*sin(state_[0]);
+
+    std::cout<<"y[0]: "<<observation_[0]<<std::endl;
+    std::cout<<"y[1]: "<<observation_[1]<<std::endl;
+    std::cout<<"y[2]: "<<observation_[2]<<std::endl;
 }
 

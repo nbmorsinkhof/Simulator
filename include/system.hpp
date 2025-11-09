@@ -25,7 +25,7 @@ struct SystemInterface{
 struct SystemObjects{
     SystemInterface& system_interface;
     Simulator& simulator;
-    StateSpacePendulum& state_space;
+    StateSpaceSegway& state_space;
 
     void link_subsystems(){
         simulator.set_system(this);

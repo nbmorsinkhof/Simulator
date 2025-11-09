@@ -22,6 +22,9 @@ int main(int argc, char* argv[]){
     //Set state of pendulum
     pendulum.set_state(0.6, 0);
 
+    StateSpaceSegway segway;
+    segway.set_state(3.14/2, 2);
+
     // Create simulator and pass pendulum
     Simulator simulator;
     // Create Graphics instance
@@ -31,7 +34,7 @@ int main(int argc, char* argv[]){
     SystemObjects system_objects{
        system_interface,
        simulator,
-       pendulum
+       segway
     };
 
     System system(&system_objects);

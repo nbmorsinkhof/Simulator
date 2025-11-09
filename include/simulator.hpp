@@ -19,7 +19,6 @@ public:
     //member functions
     void set_system(SystemObjects* s);
 
-    void set_length_arm(float L);
     void update_state();
     void simulate();
     void run();

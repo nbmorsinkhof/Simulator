@@ -18,10 +18,6 @@ std::vector<float> Simulator::get_observation(){
 }
 
 //functions
-void Simulator::set_length_arm(float L){
-    SystemObjects_->state_space.set_length_arm(L);
-    update_state();
-}
 
 void Simulator::update_state(){
     SystemObjects_->state_space.update_ddtState();
@@ -30,9 +26,6 @@ void Simulator::update_state(){
         x_new = forward_euler(dt_, SystemObjects_->state_space.get_ddtState()[i], SystemObjects_->state_space.get_state()[i]);
         SystemObjects_->state_space.set_state(x_new, i);
     }
-
-    std::cout<<"x[0]: "<<SystemObjects_->state_space.get_state()[0]<<std::endl;
-    std::cout<<"x[1]: "<<SystemObjects_->state_space.get_state()[1]<<std::endl;
 }
 
 void Simulator::run(){
