@@ -101,6 +101,19 @@ StateSpaceSegway::StateSpaceSegway()
     observation_ = {0.0, 0.0, 0.0};
  }
 
+std::vector<float> StateSpaceSegway::f_state_space(std::vector<float> state){
+    float C_ = mass_body*r_wheel*length*cos(state[2]);
+    float S_ = mass_body*r_wheel*length*sin(state[2]);
+    std::vector<float> ddt_state = {0, 0, 0, 0};
+
+    ddt_state[0] = state_[1];
+    ddt_state[1] = B_*S_*pow(state_[3],2) - C_*mass_body*g*length*sin(state_[2]) / (A_*B_ - pow(C_, 2) );
+    ddt_state[2] = state_[3];
+    ddt_state[3] = C_*S_*pow(state_[3],2) - A_*mass_body*g*length*sin(state_[2]) / (A_*B_ - pow(C_, 2) );
+    return ddt_state;
+}
+
+
 void StateSpaceSegway::state_space_equation(){
     C_ = mass_body*r_wheel*length*cos(state_[2]);
     S_ = mass_body*r_wheel*length*sin(state_[2]);

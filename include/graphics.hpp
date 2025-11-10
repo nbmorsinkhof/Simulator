@@ -21,8 +21,6 @@
 
 
 class SystemObjects;
-
-
 /***************************** GEOMETRIC OBJECTS****************************** */
 /***************************** GEOMETRIC OBJECTS****************************** */
 /***************************** GEOMETRIC OBJECTS****************************** */
@@ -129,10 +127,10 @@ protected:
     virtual void init();
     std::unordered_map<std::string, std::unique_ptr<GeometricObject>> objects_;
 
-    std::array<float, 2> x_world_limits_ = {-1.0, 1.0};
-    std::array<float, 2> y_world_limits_ = {-1.0, 1.0};
-    float X_origin_ = 1.0;
-    float Y_origin_ = 1.0;
+    std::array<float, 2> x_world_limits_ = {-2.0, 2.0};
+    std::array<float, 2> y_world_limits_ = {-2.0, 2.0};
+    float X_origin_ = 2.0;
+    float Y_origin_ = 2.0;
 
     const int PIXEL_WIDTH_ = 800;
     const int PIXEL_HEIGHT_ = 800;

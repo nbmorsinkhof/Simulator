@@ -29,6 +29,7 @@ public:
 
     void set_observation(float value, int index);
 
+
 protected:
     //variables
     int dimension_;
@@ -59,7 +60,7 @@ public:
     
 
 protected:
-    void state_space_equation() override; // virtual for polymorphism
+    void state_space_equation() override;
     void state_space_observation() override;
     float length_arm = 0.75;
     float g = 9.81;
@@ -76,12 +77,14 @@ class StateSpaceSegway: public StateSpace {
 public:
     StateSpaceSegway();
 
+    std::vector<float> f_state_space(std::vector<float> state);
+
 protected:
-    void state_space_equation() override; // virtual for polymorphism
+    void state_space_equation() override; 
     void state_space_observation() override;
     float length = 0.75;
     float g = 9.81;
-    float mass_body = 1.0; //kg
+    float mass_body = 3.0; //kg
     float mass_wheel = 0.1; //kg
     float inertia_body = (mass_body*length*length)/12;
     float r_wheel = 0.1; //meters 

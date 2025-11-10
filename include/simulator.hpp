@@ -23,12 +23,17 @@ public:
     void simulate();
     void run();
 protected:
+
+    std::vector<float> f_state_space(std::vector<float> state);
+    
     //member variables
     float dt_ = 0.005;
 
     //functions
 
     float forward_euler(float dt, float ddt_x, float x_prev);
+
+    std::vector<float> runge_kutta(float dt, std::vector<float> x_prev);
 
     //float runge_kutta(float dt, float ddt_x, float x_prev);
 
