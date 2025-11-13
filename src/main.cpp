@@ -23,7 +23,7 @@ int main(int argc, char* argv[]){
     pendulum.set_state(0.6, 0);
 
     StateSpaceSegway segway;
-    segway.set_state(3.14/8, 2);
+    segway.set_state(-0.12*3.14, 2);
 
     // Create simulator and pass pendulum
     Simulator simulator;

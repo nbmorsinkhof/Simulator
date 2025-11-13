@@ -16,7 +16,7 @@
 /**********************OBJECTS**************************** */
 void GeometricObject::worldToPixel(std::array<float, 2> world_pos, QPointF& p){
     p.setX(canvas_config.PIXEL_WIDTH*(world_pos[0] + canvas_config.x_origin)/(canvas_config.x_world_limits[1]-canvas_config.x_world_limits[0]));
-    p.setY(canvas_config.PIXEL_HEIGHT*(world_pos[1] + canvas_config.y_origin)/(canvas_config.y_world_limits[1]-canvas_config.y_world_limits[0]));
+    p.setY(canvas_config.PIXEL_HEIGHT-(canvas_config.PIXEL_HEIGHT*(world_pos[1] + canvas_config.y_origin)/(canvas_config.y_world_limits[1]-canvas_config.y_world_limits[0])));
     
     std::cout<<name<<std::endl;
     std::cout<<"canvas config: "<<canvas_config.x_world_limits[0]<<", "<<canvas_config.x_world_limits[1]<<std::endl;
@@ -262,7 +262,6 @@ CanvasSegway::CanvasSegway(QWidget* parent, Qt::WindowFlags f)
         init();
     }
 
-
 void CanvasSegway::init() {
     objects_.emplace("segway_body", std::make_unique<LineObject>("segway_body", canvas_config_)) ;
     objects_.emplace("segway_wheels", std::make_unique<CircleObject>("segway_wheels", canvas_config_)) ;
@@ -296,6 +295,7 @@ void CanvasSegway::setObjectWorldPos() {
         dynamic_cast<LineObject*>(body)->position_world[1] = obs[2];
         dynamic_cast<LineObject*>(body)->base_world[0] = obs[0];
         dynamic_cast<LineObject*>(body)->base_world[1] = 0.0;
+        std::cout<<"Y_-coordinate pixel body ==== " <<dynamic_cast<LineObject*>(body)->geometry.y2()<<std::endl;
     }
 
     if (auto* wheel_line = get_GeometricObject("line_wheel")){

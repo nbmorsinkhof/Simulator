@@ -82,16 +82,20 @@ public:
 protected:
     void state_space_equation() override; 
     void state_space_observation() override;
-    float length = 0.75;
+    float length = 0.4;
     float g = 9.81;
-    float mass_body = 3.0; //kg
-    float mass_wheel = 0.1; //kg
+    float mass_body = 2.0; //kg
+    float mass_wheel = 0.3; //kg
     float inertia_body = (mass_body*length*length)/12;
-    float r_wheel = 0.1; //meters 
+    float r_wheel = 0.15; //meters 
     float A_ = pow(r_wheel, 2)*(mass_body + 2*mass_wheel);
     float B_ = inertia_body + mass_body*pow(length, 2);
     float C_ = mass_body*r_wheel*length*cos(state_[2]);
     float S_ = C_ = mass_body*r_wheel*length*sin(state_[2]);
+    float torque_ = 0.0;
+    float k1 = -20.0;
+    float k2 = -2.0;
+    float theta_setpoint = 0.0;
 };
 
 #endif
