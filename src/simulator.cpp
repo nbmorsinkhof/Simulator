@@ -5,10 +5,12 @@
 #include "system.hpp"
 #include "simulator.hpp"
 #include "state_space.hpp"
+#include "CsvLogger.hpp"
 
 
 //constructor
 Simulator::Simulator()
+    : logdata_{0.0, {}, {}, {}}, logger_("data_log2", &Simulator::stateFormatter)
 {
     //update_state();
 }
@@ -19,7 +21,6 @@ std::vector<float> Simulator::get_observation(){
 }
 
 //functions
-
 void Simulator::update_state(){
     SystemObjects_->state_space.update_ddtState();
     std::vector<float> x_runge_kutta = runge_kutta(
@@ -33,14 +34,18 @@ void Simulator::update_state(){
         SystemObjects_->state_space.set_state(x_runge_kutta[i], i);
         
     }
+    log_data();
 }
 
 void Simulator::run(){
     while(true){
         if(SystemObjects_->system_interface.state == RUN){
             update_state();
+            
+            
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        std::this_thread::sleep_for(
+            std::chrono::milliseconds(5));
     }
 }
 
@@ -84,4 +89,25 @@ std::vector<float> Simulator::runge_kutta(float dt, std::vector<float> x_prev){
     }
 
     return x;
+}
+
+void Simulator::stateFormatter(std::ostream& os, const LogData& data){
+    os << data.time << ",";
+    for(auto& v_i : data.state){
+        std::cout<<" LOGGING DATA............................. "<<v_i<<std::endl;
+        os << v_i <<",";
+    }
+    for(auto& v_i : data.observation){
+        os << v_i <<",";
+    }
+    for(auto& v_i : data.control_input){
+        os << v_i <<",";
+    }
+}
+
+void Simulator::log_data(){
+    logdata_.state = SystemObjects_->state_space.get_state();
+    logdata_.observation = SystemObjects_->state_space.get_observation();
+    logdata_.control_input = SystemObjects_->state_space.get_control_input();
+    logger_.log_data(logdata_);
 }

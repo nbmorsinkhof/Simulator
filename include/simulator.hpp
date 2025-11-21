@@ -4,9 +4,18 @@
 #include <vector>
 
 #include "state_space.hpp"
+#include "CsvLogger.hpp"
 
 struct SystemObjects;
 class StateSpacePendulum;
+
+
+struct LogData {
+    float time;
+    std::vector<float> state;
+    std::vector<float> observation;
+    std::vector<float> control_input;
+};
 
 class Simulator{
 public:
@@ -27,7 +36,7 @@ protected:
     std::vector<float> f_state_space(std::vector<float> state);
     
     //member variables
-    float dt_ = 0.005;
+    float dt_ = 0.005; //seconds
 
     //functions
 
@@ -35,10 +44,16 @@ protected:
 
     std::vector<float> runge_kutta(float dt, std::vector<float> x_prev);
 
+    static void stateFormatter(std::ostream& os, const LogData& data);
+
+    void log_data();
     //float runge_kutta(float dt, float ddt_x, float x_prev);
 
 private:
     SystemObjects* SystemObjects_ = nullptr;
+    LogData logdata_; 
+    CsvLogger<LogData> logger_;
+    
 };
 
 

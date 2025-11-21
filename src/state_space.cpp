@@ -33,6 +33,10 @@ const std::vector<float>& StateSpace::get_observation() const{
     std::shared_lock<std::shared_timed_mutex> lock(observation_mutex_);
     return observation_;
 }
+const std::vector<float>& StateSpace::get_control_input() const{
+    std::shared_lock<std::shared_timed_mutex> lock(observation_mutex_);
+    return control_input_;
+}
 //mutation functions
 void StateSpace::set_system(SystemObjects* s){
     SystemObjects_ = s;
@@ -99,30 +103,34 @@ StateSpaceSegway::StateSpaceSegway()
  : StateSpace(4)
  {
     observation_ = {0.0, 0.0, 0.0};
+    control_input_ = {0.0};
  }
 
 std::vector<float> StateSpaceSegway::f_state_space(std::vector<float> state){
     torque_ = k1*(state_[2]-theta_setpoint) + k2*state_[3];
+    
     float C_ = mass_body*r_wheel*length*cos(state[2]);
     float S_ = mass_body*r_wheel*length*sin(state[2]);
     std::vector<float> ddt_state = {0, 0, 0, 0};
 
     ddt_state[0] = state_[1];
-    ddt_state[1] = -B_*S_*pow(state_[3],2) + C_*mass_body*g*length*sin(state_[2]) / (A_*B_ - pow(C_, 2) ) - 1*state_[1] /* control */ + torque_*(B_ - C_)/ (A_*B_ - pow(C_, 2) )  ;
+    ddt_state[1] = -B_*S_*pow(state_[3],2) + C_*mass_body*g*length*sin(state_[2]) / (A_*B_ - pow(C_, 2) ) - 0.8*state_[1] /* control */ + torque_*(B_ - C_)/ (A_*B_ - pow(C_, 2) )  ;
     ddt_state[2] = state_[3];
-    ddt_state[3] = -C_*S_*pow(state_[3],2) + A_*mass_body*g*length*sin(state_[2]) / (A_*B_ - pow(C_, 2) ) - 1*state_[3]/* control */ + torque_*(C_- A_)/ (A_*B_ - pow(C_, 2) );
+    ddt_state[3] = -C_*S_*pow(state_[3],2) + A_*mass_body*g*length*sin(state_[2]) / (A_*B_ - pow(C_, 2) ) - 0.1*state_[3]/* control */ + torque_*(C_- A_)/ (A_*B_ - pow(C_, 2) );
     return ddt_state;
 }
 
 void StateSpaceSegway::state_space_equation(){
     torque_ = k1*(state_[2]-theta_setpoint) + k2*state_[3];
+    control_input_[0] = torque_;
+
     C_ = mass_body*r_wheel*length*cos(state_[2]);
     S_ = mass_body*r_wheel*length*sin(state_[2]);
 
     ddt_state_[0] = state_[1];
-    ddt_state_[1] = -B_*S_*pow(state_[3],2) + C_*mass_body*g*length*sin(state_[2]) / (A_*B_ - pow(C_, 2) )  - 1*state_[1]/* control */ + torque_*(B_ - C_)/ (A_*B_ - pow(C_, 2) )  ;
+    ddt_state_[1] = -B_*S_*pow(state_[3],2) + C_*mass_body*g*length*sin(state_[2]) / (A_*B_ - pow(C_, 2) )  - 0.8*state_[1]/* control */ + torque_*(B_ - C_)/ (A_*B_ - pow(C_, 2) )  ;
     ddt_state_[2] = state_[3];
-    ddt_state_[3] = -C_*S_*pow(state_[3],2) + A_*mass_body*g*length*sin(state_[2]) / (A_*B_ - pow(C_, 2) ) /-1*state_[3]/* control */ + torque_*(C_- A_)/ (A_*B_ - pow(C_, 2) );
+    ddt_state_[3] = -C_*S_*pow(state_[3],2) + A_*mass_body*g*length*sin(state_[2]) / (A_*B_ - pow(C_, 2) ) /-0.1*state_[3]/* control */ + torque_*(C_- A_)/ (A_*B_ - pow(C_, 2) );
 }
 
 void StateSpaceSegway::state_space_observation(){

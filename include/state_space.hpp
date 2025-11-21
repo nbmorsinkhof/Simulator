@@ -19,6 +19,7 @@ public:
     const std::vector<float>& get_state() const;
     const std::vector<float>& get_ddtState() const;
     const std::vector<float>& get_observation() const;
+    const std::vector<float>& get_control_input() const;
 
     //transmutators
     void set_system(SystemObjects* s);
@@ -36,6 +37,7 @@ protected:
     std::vector<float> state_;
     std::vector<float> ddt_state_;
     std::vector<float> observation_;
+    std::vector<float> control_input_;
 
     // Internal computation
     virtual void state_space_equation();  // virtual for polymorphism
@@ -94,8 +96,8 @@ protected:
     float S_ = C_ = mass_body*r_wheel*length*sin(state_[2]);
     float torque_ = 0.0;
     float k1 = -20.0;
-    float k2 = -2.0;
-    float theta_setpoint = 0.0;
+    float k2 = -4.0;
+    float theta_setpoint = 0.00;
 };
 
 #endif
